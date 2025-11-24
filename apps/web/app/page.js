@@ -2,7 +2,6 @@
 
 import { Header } from "../components/Header";
 import { AccountInfo } from "../components/AccountInfo";
-import { ContractDeployment } from "../components/ContractDeployment";
 import { ContractInteraction } from "../components/ContractInteraction";
 import { TransactionForm } from "../components/TransactionForm";
 
@@ -24,11 +23,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <ContractDeployment />
           <ContractInteraction />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <TransactionForm />
         </div>
 
@@ -36,10 +31,9 @@ export default function Home() {
           <h2 className="text-xl font-bold mb-3">Getting Started</h2>
           <div className="space-y-2 text-sm">
             <p>1. Connect your wallet using the button in the header</p>
-            <p>2. Upload your WASM contract file to get the hex code</p>
-            <p>3. Deploy your smart contract to AlphaNet (requires 100 XRP fee)</p>
-            <p>4. Interact with deployed contracts using the contract interaction panel</p>
-            <p>5. Send XRP transactions using the transaction form</p>
+            <p>2. Deploy your smart contract using Bedrock or XRPL CLI</p>
+            <p>3. Interact with deployed contracts using the contract interaction panel</p>
+            <p>4. Send XRP transactions using the transaction form</p>
           </div>
         </div>
       </main>
