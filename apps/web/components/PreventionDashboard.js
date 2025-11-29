@@ -157,29 +157,40 @@ export default function PreventionDashboard() {
         />
       )}
 
-      {/* Certificates */}
-      {certificates.length > 0 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-slate-200">My Prevention Certificates</h3>
+{/* Certificates */}
+{certificates.length > 0 && (
+  <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-6 space-y-4">
+    <h3 className="text-lg font-semibold text-slate-200">My Prevention Certificates</h3>
 
-          {certificates.map((c) => (
-            <div
-              key={c.txHash}
-              className="p-4 border border-slate-700 bg-slate-800/40 rounded-xl"
-            >
-              <p className="text-slate-200 font-medium">{c.label}</p>
-              <p className="text-xs text-slate-400">{new Date(c.date).toLocaleString()}</p>
-              <a
-                className="text-xs text-sky-400 hover:underline"
-                href={`https://explorer.xrplf.org/transactions/${c.txHash}`}
-                target="_blank"
-              >
-                View on XRPL Explorer
-              </a>
-            </div>
-          ))}
+    {certificates.map((c) => {
+      // Detect network explorer URL
+      const explorerBase =
+        accountInfo?.network?.includes("Test") || accountInfo?.network?.toLowerCase().includes("testnet")
+          ? "https://testnet.xrpscan.com/tx/"
+          : "https://xrpscan.com/tx/";
+
+      return (
+        <div
+          key={c.txHash}
+          className="p-4 border border-slate-700 bg-slate-800/40 rounded-xl"
+        >
+          <p className="text-slate-200 font-medium">{c.label}</p>
+          <p className="text-xs text-slate-400">{new Date(c.date).toLocaleString()}</p>
+
+          <a
+            className="text-xs text-sky-400 hover:underline"
+            href={`${explorerBase}${c.txHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View on XRPSCAN
+          </a>
         </div>
-      )}
+      );
+    })}
+  </div>
+)}
+
 
       {/* Progress & Rewards */}
       <ProgressUI certificates={certificates} />
