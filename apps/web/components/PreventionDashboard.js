@@ -28,23 +28,39 @@ export default function PreventionDashboard() {
   // --- DATA STATE ---
   const [certificates, setCertificates] = useState([]);
   const [profile, setProfile] = useState(null);
-  const [profileForm, setProfileForm] = useState({ firstName: "", lastName: "", birthYear: "", gender: "", country: "fr" });
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    birthYear: "",
+    gender: "",
+    country: "fr",
+  });
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  
+
   const [validationMode, setValidationMode] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingChain, setIsLoadingChain] = useState(false);
   const [chainError, setChainError] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [profileError, setProfileError] = useState(null);
   
   const supabaseReady = Boolean(supabase);
   const [ageBandId, setAgeBandId] = useState(null);
   const [ageBandLabel, setAgeBandLabel] = useState("");
-  
-  const countryOptions = [ { code: "fr", label: "France" }, { code: "de", label: "Germany" }, { code: "uk", label: "United Kingdom" }, { code: "us", label: "USA" } ];
+
+  const countryOptions = [
+    { code: "fr", label: "France" },
+    { code: "de", label: "Germany" },
+    { code: "es", label: "Spain" },
+    { code: "it", label: "Italy" },
+    { code: "uk", label: "United Kingdom" },
+    { code: "ie", label: "Ireland" },
+    { code: "nl", label: "Netherlands" },
+    { code: "be", label: "Belgium" },
+    { code: "pt", label: "Portugal" },
+    { code: "pl", label: "Poland" },
+  ];
 
   // Actions & Screenings Data
   const [actions, setActions] = useState([
@@ -57,7 +73,7 @@ export default function PreventionDashboard() {
   ]);
   const [screenings, setScreenings] = useState([]);
 
-  // Helpers Logic (Memo, Dates, Filters)
+  // Helpers Logic
   const actionLabelById = useMemo(() => {
     const map = new Map();
     actions.forEach((a) => map.set(a.id, a.label));
@@ -192,7 +208,8 @@ export default function PreventionDashboard() {
 
   return (
     <div className="relative space-y-8">
-      {/* Background (inchangé) */}
+      
+      {/* Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute inset-0 bg-[#FDF8F6]"></div>
         <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] bg-purple-200/30 rounded-full blur-[100px] animate-blob"></div>
@@ -201,7 +218,7 @@ export default function PreventionDashboard() {
 
       <div className="relative z-10 space-y-8">
         
-        {/* === 1. NAVIGATION BAR (TABS) === */}
+        {/* Tabs */}
         <div className="flex justify-center pt-4">
           <div className="inline-flex p-1 bg-white rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/40">
             {['dashboard', 'actions', 'certificates', 'rewards'].map((tab) => (
@@ -218,7 +235,7 @@ export default function PreventionDashboard() {
           </div>
         </div>
 
-        {/* === 2. CONTENT AREA (Switch Tabs) === */}
+        {/* Content */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {activeTab === "dashboard" && (
@@ -260,31 +277,60 @@ export default function PreventionDashboard() {
         </div>
       </div>
 
-      {/* --- MODALS (Toujours dans le parent pour gérer l'overlay global) --- */}
+      {/* --- MODALE PROFIL AVEC FLOU ULTIME (Z-9999) --- */}
       {showProfileForm && isConnected && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-8">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">Edit Profile</h3>
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <input className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-4" value={profileForm.firstName} onChange={(e) => setProfileForm((p) => ({ ...p, firstName: e.target.value }))} placeholder="First Name" />
-              <input className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-4" value={profileForm.lastName} onChange={(e) => setProfileForm((p) => ({ ...p, lastName: e.target.value }))} placeholder="Last Name" />
-              <input type="number" className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-4" value={profileForm.birthYear} onChange={(e) => setProfileForm((p) => ({ ...p, birthYear: e.target.value }))} placeholder="Birth Year" />
-              <select className="w-full bg-slate-50 border-slate-200 rounded-2xl px-5 py-4" value={profileForm.country} onChange={(e) => setProfileForm((p) => ({ ...p, country: e.target.value }))}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-8 space-y-6 relative animate-in zoom-in-95 duration-300">
+            
+            <div className="text-center space-y-2">
+              <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">Required setup</p>
+              <h3 className="text-3xl font-extrabold text-slate-900">Link your profile to this wallet</h3>
+              <p className="text-slate-500 text-sm">Fill these details to personalize recommendations.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <input className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none" 
+                value={profileForm.firstName} onChange={(e) => setProfileForm((p) => ({ ...p, firstName: e.target.value }))} placeholder="First Name" />
+              
+              <input className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none" 
+                value={profileForm.lastName} onChange={(e) => setProfileForm((p) => ({ ...p, lastName: e.target.value }))} placeholder="Last Name" />
+              
+              <input type="number" min="1900" max="2100" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none" 
+                value={profileForm.birthYear} onChange={(e) => setProfileForm((p) => ({ ...p, birthYear: e.target.value }))} placeholder="Birth Year" />
+              
+              <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none" 
+                value={profileForm.gender || ""} onChange={(e) => setProfileForm((p) => ({ ...p, gender: e.target.value }))}>
+                <option value="" disabled>Select gender</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="nonbinary">Non-binary</option>
+              </select>
+
+              <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none md:col-span-2" 
+                value={profileForm.country} onChange={(e) => setProfileForm((p) => ({ ...p, country: e.target.value }))}>
                 {countryOptions.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
               </select>
             </div>
-            <div className="flex gap-4">
-              <button onClick={saveProfile} disabled={!profileValid || isSavingProfile} className="flex-1 py-4 rounded-2xl bg-purple-600 text-white font-bold">{isSavingProfile ? "Saving..." : "Save"}</button>
-              <button onClick={() => setShowProfileForm(false)} className="px-8 py-4 rounded-2xl border border-slate-200">Cancel</button>
+
+            <div className="flex gap-4 pt-2">
+              <button onClick={saveProfile} disabled={!profileValid || isSavingProfile} className="flex-1 py-4 rounded-2xl bg-purple-600 text-white font-bold text-lg hover:bg-purple-700 shadow-lg shadow-purple-500/30 disabled:opacity-50">
+                {isSavingProfile ? "Saving..." : "Save Profile"}
+              </button>
+              {profile && (
+                <button onClick={() => setShowProfileForm(false)} className="px-8 py-4 rounded-2xl border border-slate-200 text-slate-500 font-bold hover:bg-slate-50">
+                  Cancel
+                </button>
+              )}
             </div>
+
           </div>
         </div>
       )}
 
       {validationMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md animate-in fade-in">
           <div className="w-full max-w-md bg-white rounded-[2rem] p-6 shadow-2xl relative">
-            <button onClick={() => setValidationMode(null)} className="absolute top-4 right-4 text-slate-400">✕</button>
+            <button onClick={() => setValidationMode(null)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✕</button>
             {validationMode === "choose" && <ValidationModes onModeSelected={setValidationMode} />}
             {validationMode === "qr" && <QRValidation onBack={() => setValidationMode("choose")} />}
             {validationMode === "provider" && <ProviderCode onBack={() => setValidationMode("choose")} onValidated={() => validateOnChain(pendingAction)} />}
