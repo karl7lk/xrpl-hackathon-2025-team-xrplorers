@@ -33,7 +33,7 @@ export async function POST(req) {
       user: {
         email: user.email,
         role: user.role,
-        organization: user.organization_name,
+        organization: user.organization,
         country: user.country_code,
         status: user.status
       }
