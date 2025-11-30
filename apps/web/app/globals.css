@@ -4,7 +4,8 @@
 
 @layer base {
   body {
-    @apply text-slate-50 bg-slate-950;
+    /* Changement du fond noir vers un blanc cassé/crème (#FDF8F6) et texte sombre */
+    @apply text-slate-900 bg-[#FDF8F6];
   }
 }
 
@@ -19,7 +20,6 @@
     animation-delay: 6s;
   }
   
-  /* Masquer la scrollbar pour un look plus clean sur certains conteneurs */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -29,38 +29,24 @@
   }
 }
 
-/* Animation "Blob" pour les couleurs qui flottent */
 @keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
 }
 
 .animate-blob {
   animation: blob 10s infinite;
 }
 
-/* Effet de brillance qui passe sur les cartes */
 @keyframes shimmer {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: -200% 0;
-  }
+  from { background-position: 0 0; }
+  to { background-position: -200% 0; }
 }
 
 .bg-shimmer {
-  background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 3s infinite linear;
 }
