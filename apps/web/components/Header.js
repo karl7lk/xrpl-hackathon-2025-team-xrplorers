@@ -9,11 +9,12 @@ export function Header() {
   const { statusMessage } = useWallet();
 
   return (
-    // Fond blanc cassé semi-transparent + flou
     <header className="sticky top-0 z-50 w-full transition-all">
       
-      {/* --- BACKGROUND LAYER --- */}
-      <div className="absolute inset-0 w-full h-full bg-[#FDF8F6]/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm pointer-events-none" />
+      {/* --- BACKGROUND LAYER (Transparence ici) --- */}
+      {/* bg-[#FDF8F6]/30 = Couleur crème avec 30% d'opacité */}
+      {/* backdrop-blur-md = Effet de flou "verre dépoli" */}
+      <div className="absolute inset-0 w-full h-full bg-[#FDF8F6]/30 backdrop-blur-md border-b border-slate-200/30 shadow-sm pointer-events-none" />
 
       {/* --- CONTENT LAYER --- */}
       <div className="relative container mx-auto px-6 h-24">
@@ -21,7 +22,6 @@ export function Header() {
           
           {/* LOGO */}
           <div className="flex items-center gap-4 group cursor-pointer select-none">
-            {/* Dégradé violet/rose pour le logo */}
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 shadow-[0_0_20px_rgba(236,72,153,0.3)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white drop-shadow-md">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />

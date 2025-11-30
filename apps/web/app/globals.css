@@ -4,49 +4,64 @@
 
 @layer base {
   body {
-    /* Changement du fond noir vers un blanc cassé/crème (#FDF8F6) et texte sombre */
     @apply text-slate-900 bg-[#FDF8F6];
   }
 }
 
 @layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .animation-delay-6000 {
-    animation-delay: 6s;
-  }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-@keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
+/* --- ANIMATIONS AURORA (Plus rapides & mouvements plus larges) --- */
+@keyframes aurora-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(100px, -50px) rotate(15deg) scale(1.2); }
+  66% { transform: translate(-50px, 50px) rotate(-5deg) scale(0.9); }
+}
+@keyframes aurora-2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(-80px, 60px) rotate(-15deg) scale(1.1); }
+  66% { transform: translate(40px, -80px) rotate(10deg) scale(0.9); }
+}
+@keyframes aurora-3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(60px, -40px) rotate(10deg) scale(1.1); }
+  66% { transform: translate(-60px, 60px) rotate(-10deg) scale(0.9); }
 }
 
-.animate-blob {
-  animation: blob 10s infinite;
-}
+/* Durées réduites : 12s -> 8s pour plus de dynamisme */
+.animate-aurora-1 { animation: aurora-1 8s infinite ease-in-out; }
+.animate-aurora-2 { animation: aurora-2 10s infinite ease-in-out reverse; }
+.animate-aurora-3 { animation: aurora-3 12s infinite ease-in-out; }
 
-@keyframes shimmer {
-  from { background-position: 0 0; }
-  to { background-position: -200% 0; }
-}
+/* --- CUSTOM WALLET STYLE --- */
+xrpl-wallet-connector {
+  display: inline-block;
 
-.bg-shimmer {
-  background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer 3s infinite linear;
+  /* 1. BOUTON "CONNECT WALLET" (Header) */
+  --xc-button-background-color: linear-gradient(to right, #9333ea, #db2777) !important; /* Gradient Violet/Rose */
+  --xc-button-hover-background-color: linear-gradient(to right, #7e22ce, #be185d) !important;
+  --xc-button-text-color: #ffffff !important;
+  --xc-button-border-radius: 9999px !important; /* Arrondi complet */
+  --xc-button-padding: 12px 24px !important;
+
+  /* 2. LA MODALE (Popup) */
+  --xc-modal-background-color: #ffffff !important; /* Fond BLANC */
+  --xc-modal-text-color: #1e293b !important;       /* Texte FONCÉ */
+  --xc-modal-border: 1px solid #e2e8f0 !important;
+  --xc-modal-border-radius: 24px !important;
+  --xc-modal-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+
+  /* 3. BOUTONS INTERNES (Liste des wallets comme GemWallet) */
+  --xc-wallet-background-color: #f8fafc !important;       /* Gris très clair */
+  --xc-wallet-text-color: #334155 !important;             /* Texte gris foncé */
+  --xc-wallet-border-color: #e2e8f0 !important;           /* Bordure fine */
+  --xc-wallet-hover-background-color: #f1f5f9 !important; /* Gris au survol */
+
+  /* 4. GÉNÉRAL */
+  --xc-primary-color: #9333ea !important; /* Couleur d'accentuation (Violet) */
+  --xc-font-family: 'Inter', sans-serif !important;
 }
