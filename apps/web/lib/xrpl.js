@@ -100,3 +100,45 @@ export async function fetchPreventionCertificatesFromChain(accountAddress, opts 
     client.disconnect();
   }
 }
+
+/**
+ * Mint a transferable NFT as a reward once a prevention action is validated.
+ * Stores basic metadata in the URI for easy retrieval.
+ */
+export async function mintRewardNft(walletManager, accountInfo, actionId) {
+  if (!walletManager) throw new Error("Wallet Manager not available");
+  if (!accountInfo?.address) throw new Error("Wallet address missing");
+
+  const metadata = {
+    type: "prevhero-certificate",
+    actionId,
+    owner: accountInfo.address,
+    issuedAt: new Date().toISOString(),
+  };
+
+  const tx = {
+    TransactionType: "NFTokenMint",
+    Account: accountInfo.address,
+    // tfTransferable so the user can move it if desired.
+    Flags: 8,
+    NFTokenTaxon: 0,
+    URI: Buffer.from(JSON.stringify(metadata), "utf8").toString("hex"),
+  };
+
+  const res = await walletManager.signAndSubmit(tx);
+
+  const txHash =
+    res?.tx_json?.hash ||
+    res?.result?.tx_json?.hash ||
+    res?.hash ||
+    res?.response?.tx_json?.hash;
+
+  const nftId =
+    res?.meta?.nftoken_id ||
+    res?.result?.meta?.nftoken_id ||
+    res?.response?.meta?.nftoken_id;
+
+  if (!txHash) throw new Error("NFT mint rejected or no hash returned");
+
+  return { txHash, nftId };
+}

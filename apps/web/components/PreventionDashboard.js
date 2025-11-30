@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useWallet } from "./providers/WalletProvider";
 import ValidationModes from "./ValidationModes";
 import QRValidation from "./QRValidation";
@@ -16,6 +17,7 @@ import RewardsTab from "./tabs/RewardsTab";
 import {
   submitPreventionAction,
   fetchPreventionCertificatesFromChain,
+  mintRewardNft, // AJOUTÉ : Import de la fonction NFT
 } from "../lib/xrpl";
 import { supabase } from "../lib/supabaseClient";
 
@@ -48,6 +50,7 @@ export default function PreventionDashboard() {
   const supabaseReady = Boolean(supabase);
   const [ageBandId, setAgeBandId] = useState(null);
   const [ageBandLabel, setAgeBandLabel] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   const countryOptions = [
     { code: "fr", label: "France" },
@@ -114,11 +117,49 @@ export default function PreventionDashboard() {
     if (!isConnected) return;
     try {
       setIsProcessing(true);
+      
+      // 1. Validation de l'action (Memo)
       const txHash = await submitPreventionAction(walletManager, accountInfo, action.id);
-      setCertificates((prev) => [{ id: action.id, label: action.label, date: new Date().toISOString(), txHash, owner: accountInfo.address }, ...prev]);
-      if (supabaseReady) await supabase.from("certificates").upsert({ wallet: accountInfo.address, action_id: action.id, label: action.label, tx_hash: txHash }, { onConflict: "wallet,action_id" });
-      showStatus("Prevention validated on XRPL!", "success");
-    } catch (err) { showStatus("Transaction failed", "error"); } 
+      
+      // 2. Tentative de Mint du NFT (AJOUTÉ)
+      let minted = null;
+      try {
+        minted = await mintRewardNft(walletManager, accountInfo, action.id);
+        showStatus("Prevention validated + NFT minté !", "success");
+      } catch (nftErr) {
+        console.warn("NFT mint failed", nftErr);
+        showStatus("Certificat validé, mais échec du NFT.", "warning");
+      }
+
+      // 3. Mise à jour de l'état local avec les infos NFT
+      const newCert = { 
+        id: action.id, 
+        label: action.label, 
+        date: new Date().toISOString(), 
+        txHash, 
+        owner: accountInfo.address,
+        nftId: minted?.nftId || null,      // Info NFT
+        nftTxHash: minted?.txHash || null, // Hash NFT
+      };
+
+      setCertificates((prev) => [newCert, ...prev]);
+
+      // 4. Sauvegarde Supabase avec les colonnes NFT
+      if (supabaseReady) {
+        await supabase.from("certificates").upsert({ 
+          wallet: accountInfo.address, 
+          action_id: action.id, 
+          label: action.label, 
+          tx_hash: txHash,
+          nft_tx_hash: minted?.txHash || null, // Info NFT
+          nft_id: minted?.nftId || null        // Info NFT
+        }, { onConflict: "wallet,action_id" });
+      }
+
+    } catch (err) { 
+      console.error(err);
+      showStatus("Transaction failed", "error"); 
+    } 
     finally { setIsProcessing(false); setValidationMode(null); setPendingAction(null); }
   }
 
@@ -202,6 +243,23 @@ export default function PreventionDashboard() {
     loadScreenings();
   }, [supabaseReady]);
 
+  // track mount for portal + lock scroll when modal open
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (showProfileForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showProfileForm, mounted]);
+
 
   // --- RENDER ---
   if (activeTab === "notifications") return <Notifications onBack={() => setActiveTab("dashboard")} />;
@@ -209,12 +267,10 @@ export default function PreventionDashboard() {
   return (
     <div className="relative space-y-8">
       
-      {/* Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[#FDF8F6]"></div>
-        <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] bg-purple-200/30 rounded-full blur-[100px] animate-blob"></div>
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
-      </div>
+      {/* NOTE IMPORTANTE : 
+          L'arrière-plan (background) n'est plus ici. 
+          Il est géré globalement dans app/page.js pour éviter les coupures.
+      */}
 
       <div className="relative z-10 space-y-8">
         
@@ -278,9 +334,11 @@ export default function PreventionDashboard() {
       </div>
 
       {/* --- MODALE PROFIL AVEC FLOU ULTIME (Z-9999) --- */}
-      {showProfileForm && isConnected && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-8 space-y-6 relative animate-in zoom-in-95 duration-300">
+      {mounted && showProfileForm && isConnected && createPortal(
+        <>
+          <div className="fixed inset-0 z-[2000] bg-slate-900/40 backdrop-blur-md"></div>
+          <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+            <div className="w-full max-w-2xl bg-white rounded-[2rem] border border-slate-100 shadow-2xl p-8 space-y-6 relative animate-in zoom-in-95 duration-300">
             
             <div className="text-center space-y-2">
               <p className="text-xs font-bold text-purple-600 uppercase tracking-widest">Required setup</p>
@@ -323,8 +381,10 @@ export default function PreventionDashboard() {
               )}
             </div>
 
+            </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
 
       {validationMode && (

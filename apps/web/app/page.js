@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Ajout
-import { Shield } from "lucide-react"; // Ajout
+import { useRouter } from "next/navigation";
+import { Shield } from "lucide-react";
 import PreventionDashboard from "../components/PreventionDashboard";
 import { Header } from "../components/Header";
 import { useWallet } from "../components/providers/WalletProvider";
@@ -11,15 +11,31 @@ export default function HomePage() {
   const { isConnected } = useWallet();
 
   return (
-    <div className="min-h-screen font-sans overflow-x-hidden selection:bg-purple-200 selection:text-purple-900">
+    // min-h-screen assure que la page fait au moins la hauteur de l'écran
+    <div className="relative min-h-screen font-sans overflow-x-hidden bg-[#FDF8F6] selection:bg-purple-200 selection:text-purple-900">
+      
+      {/* --- FOND GLOBAL (Déplacé ici pour ne pas être coincé dans la carte) --- */}
+      {isConnected && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute inset-0 bg-[#FDF8F6]"></div>
+          {/* Blob Violet animé */}
+          <div className="absolute -top-[10%] -right-[10%] w-[800px] h-[800px] bg-purple-200/30 rounded-full blur-[100px] animate-blob"></div>
+          {/* Texture granuleuse */}
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
+        </div>
+      )}
+
       <Header />
-      <main>
+      
+      <main className="relative z-10">
         {isConnected ? (
           <div className="max-w-7xl mx-auto px-6 py-12 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="space-y-2 text-center md:text-left">
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
               <p className="text-slate-500 text-lg">Manage your prevention actions and certificates.</p>
             </div>
+            
+            {/* La carte contient maintenant uniquement le dashboard, plus le fond */}
             <section className="rounded-[2.5rem] border border-white/50 bg-white/60 backdrop-blur-xl p-1 shadow-xl shadow-slate-200/20">
               <PreventionDashboard />
             </section>
@@ -36,7 +52,7 @@ function LandingPage() {
   const containerRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const router = useRouter(); // Ajout
+  const router = useRouter();
 
   const handleMouseMove = (e) => {
     if (typeof window === 'undefined') return;
